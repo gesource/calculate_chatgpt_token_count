@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./docker/backend
+    ports:
+      - "8081:5000"
+    networks:
+      - app-network
+
+  frontend:
+    build: ./docker/frontend
+    ports:
+      - "8080:80"
+    networks:
+      - app-network
+    depends_on:
+      - backend
+
+networks:
+  app-network:

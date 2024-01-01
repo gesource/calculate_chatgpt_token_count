@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Calculate ChatGPT token count</title>
+    <script>
+        async function get_encoding() {
+            try {
+                const response = await fetch('http://localhost:8081/get_encoding');
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const result = await response.json();
+                if (!Array.isArray(result.encoding)) {
+                    throw new Error('Invalid response format');
+                }
+                const select = document.getElementById('encoding');
+                result.encoding.forEach(enc => {
+                    const option = document.createElement('option');
+                    option.value = enc;
+                    option.text = enc;
+                    select.add(option);
+                });
+            } catch (error) {
+                alert(error);
+            }
+        }
+
+        async function countToken(encoding, prompt) {
+            try {
+                document.getElementById('result').textContent = '';
+                const response = await fetch('http://localhost:8081/count_token', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ encoding, prompt })
+                });
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const result = await response.json();
+                document.getElementById('result').textContent = result.token_count;
+            } catch (error) {
+                alert(error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            get_encoding();
+
+            document.getElementById('send_button').addEventListener('click', function () {
+                const encoding = document.getElementById('encoding').value;
+                const prompt = document.getElementById('prompt').value;
+                countToken(encoding, prompt);
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <label for="encoding">encoding</label>:
+    <select id="encoding" name="encoding"></select><br>
+    <label for="prompt">prompt</label>:<br>
+    <textarea id="prompt" name="prompt" rows="10" cols="50"></textarea><br>
+    <button type="button" id="send_button">send</button>
+    <div>
+        Token: <span id="result"></p>
+    </div>
+</body>
+
+</html>
